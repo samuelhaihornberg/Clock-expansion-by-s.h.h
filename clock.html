@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#061018">
-<link rel="stylesheet" href="styles.css?v=20260920fix2">
+<link rel="stylesheet" href="styles.css?v=20260920spiral">
 <title>Clock Expansion — UTC</title>
 </head>
 <body class="clock-body">
@@ -13,13 +13,12 @@
 <header class="time-banner"><strong id="name">UTC</strong><span id="country">Monde</span><strong id="time">00:00:00.000</strong><span id="date">—</span></header>
 <section class="stage" aria-label="Horloge concentrique"><canvas id="clock"></canvas></section>
 </main>
-<script src="clock.js?v=20260920fix2" defer></script>
+<script src="clock.js?v=20260920spiral" defer></script>
 <script>
 window.addEventListener('DOMContentLoaded',()=>{
  const screen=document.querySelector('.clock-screen'), mode=document.querySelector('#mode-button'), full=document.querySelector('#fullscreen-button');
- mode.addEventListener('click',()=>{const calendar=document.body.classList.toggle('calendar-mode');mode.textContent=calendar?'Horloge':'Calendrier';window.dispatchEvent(new CustomEvent('clock-mode',{detail:{calendar}}));});
- full.addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await screen.requestFullscreen();}catch(e){}});
- document.addEventListener('fullscreenchange',()=>{full.textContent=document.fullscreenElement?'×':'⛶';});
+ if(mode){mode.addEventListener('click',()=>{const calendar=document.body.classList.toggle('calendar-mode');mode.textContent=calendar?'Horloge':'Calendrier';window.dispatchEvent(new CustomEvent('clock-mode',{detail:{calendar}}));});}
+ if(full){full.addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await screen.requestFullscreen();}catch(e){}});document.addEventListener('fullscreenchange',()=>{full.textContent=document.fullscreenElement?'×':'⛶';});}
 });
 </script>
 </body>
