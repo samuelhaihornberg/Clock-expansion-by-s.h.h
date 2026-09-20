@@ -1,6 +1,204 @@
-const regions={utc:['UTC','Monde','UTC'],paris:['Paris','France','Europe/Paris'],london:['Londres','Royaume-Uni','Europe/London'],newyork:['New York','États-Unis','America/New_York'],losangeles:['Los Angeles','États-Unis','America/Los_Angeles'],mexico:['Mexico','Mexique','America/Mexico_City'],saopaulo:['São Paulo','Brésil','America/Sao_Paulo'],cairo:['Le Caire','Égypte','Africa/Cairo'],johannesburg:['Johannesburg','Afrique du Sud','Africa/Johannesburg'],dubai:['Dubai','Émirats','Asia/Dubai'],mumbai:['Mumbai','Inde','Asia/Kolkata'],singapore:['Singapore','Singapour','Asia/Singapore'],tokyo:['Tokyo','Japon','Asia/Tokyo'],seoul:['Séoul','Corée du Sud','Asia/Seoul'],shanghai:['Shanghai','Chine','Asia/Shanghai'],sydney:['Sydney','Australie','Australia/Sydney'],auckland:['Auckland','Nouvelle-Zélande','Pacific/Auckland']};
-const path=location.pathname.split('/').pop();
-if(path==='index.html'||path==='')renderMenu();else startClock();
-function renderMenu(){const root=document.querySelector('#clock-menu');if(!root)return;root.innerHTML=Object.entries(regions).map(([key,[name,country]])=>`<a class="clock-button" href="clock.html?zone=${key}"><h2>${name}</h2><p>${country}</p></a>`).join('')}
-function getTimeParts(date,tz){const values={};new Intl.DateTimeFormat('en-US',{timeZone:tz,hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3}).formatToParts(date).forEach(p=>values[p.type]=p.value);return{year:+values.year,month:+values.month,day:+values.day,hour:+values.hour,minute:+values.minute,second:+values.second,ms:+(values.fractionalSecond||0)}}
-function startClock(){const key=new URLSearchParams(location.search).get('zone')||'utc';const [name,country,tz]=regions[key]||regions.utc;const canvas=document.querySelector('#clock'),ctx=canvas.getContext('2d');document.querySelector('#name').textContent=name;document.querySelector('#country').textContent=country;document.title=`Clock Expansion — ${name}`;const colors={ms:'#ff79c6',seconds:'#ff5267',minutes:'#ffd34e',hours:'#55e7cf',days:'#70baff',months:'#a98cff',year:'#ffffff'};function arc(x,y,r,a,b,w,c,alpha=1){ctx.beginPath();ctx.arc(x,y,r,a,b);ctx.lineWidth=w;ctx.strokeStyle=c;ctx.globalAlpha=alpha;ctx.stroke();ctx.globalAlpha=1}function label(v,x,y,c,size){ctx.fillStyle=c;ctx.font=`600 ${size}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(v),x,y)}function draw(t){const box=canvas.getBoundingClientRect(),d=devicePixelRatio||1,w=box.width,h=box.height;canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);ctx.globalCompositeOperation='lighter';const x=w/2,y=h/2,r=Math.min(w,h)*.35,sec=(t.second+t.ms/1000)/60,min=(t.minute+sec)/60,hour=(t.hour%24+min)/24,phase=-Math.PI/2+sec*Math.PI*2,plasma=r*(.18+.75*hour);arc(x,y,plasma,-Math.PI/2,phase,6,colors.ms,.95);arc(x,y,plasma+9,-Math.PI/2,phase,2,colors.seconds,.7);for(let n=1;n<=60;n++){const a=-Math.PI/2+n*Math.PI*2/60,rs=r*(.2+n*.006),rm=r*(.62+n*.0035),as=n===t.second+1,am=n===t.minute+1;arc(x,y,rs,as?-Math.PI/2:a-.025,a,as?3:1.1,colors.seconds,as?.95:.22);arc(x,y,rm,am?-Math.PI/2:a-.035,a,am?4:2.2,colors.minutes,am?.95:.3);label(n,x+Math.cos(a)*rs,y+Math.sin(a)*rs,colors.seconds,8);label(n,x+Math.cos(a)*rm,y+Math.sin(a)*rm,colors.minutes,8)}for(let n=1;n<=24;n++){const a=-Math.PI/2+n*Math.PI*2/24,rr=r*1.03;arc(x,y,rr,a-.05,a+.05,3,colors.hours,.25+(n<=t.hour?.35:0));label(n,x+Math.cos(a)*rr,y+Math.sin(a)*rr,colors.hours,9)}arc(x,y,r*1.13,-Math.PI/2,-Math.PI/2+Math.PI*2*t.day/31,3,colors.days,.8);arc(x,y,r*1.22,-Math.PI/2,-Math.PI/2+Math.PI*2*t.month/12,4,colors.months,.75);arc(x,y,r*1.31,-Math.PI/2,-Math.PI/2+Math.PI*2*(t.year%100)/100,5,colors.year,.7);ctx.beginPath();for(let i=0;i<=100;i++){const q=i/100,a=phase-q*2.8,rr=plasma*q*(.35+.65*q),px=x+Math.cos(a)*rr,py=y+Math.sin(a)*rr;i?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.lineWidth=7;ctx.lineCap='round';ctx.strokeStyle=colors.seconds;ctx.shadowBlur=24;ctx.shadowColor=colors.seconds;ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle=colors.ms;ctx.beginPath();ctx.arc(x+Math.cos(phase)*plasma,y+Math.sin(phase)*plasma,8,0,Math.PI*2);ctx.fill();ctx.globalCompositeOperation='source-over'}function update(){const now=new Date(),t=getTimeParts(now,tz);document.querySelector('#time').textContent=`${String(t.hour).padStart(2,'0')}:${String(t.minute).padStart(2,'0')}:${String(t.second).padStart(2,'0')}.${String(t.ms).padStart(3,'0')}`;document.querySelector('#date').textContent=new Intl.DateTimeFormat('fr',{timeZone:tz,dateStyle:'full'}).format(now);draw(t)}update();setInterval(update,50);addEventListener('resize',update)}
+const regions = {
+  utc: ['UTC', 'Monde', 'UTC'],
+  paris: ['Paris', 'France', 'Europe/Paris'],
+  london: ['Londres', 'Royaume-Uni', 'Europe/London'],
+  newyork: ['New York', 'États-Unis', 'America/New_York'],
+  losangeles: ['Los Angeles', 'États-Unis', 'America/Los_Angeles'],
+  mexico: ['Mexico', 'Mexique', 'America/Mexico_City'],
+  saopaulo: ['São Paulo', 'Brésil', 'America/Sao_Paulo'],
+  cairo: ['Le Caire', 'Égypte', 'Africa/Cairo'],
+  johannesburg: ['Johannesburg', 'Afrique du Sud', 'Africa/Johannesburg'],
+  dubai: ['Dubai', 'Émirats', 'Asia/Dubai'],
+  mumbai: ['Mumbai', 'Inde', 'Asia/Kolkata'],
+  singapore: ['Singapore', 'Singapour', 'Asia/Singapore'],
+  tokyo: ['Tokyo', 'Japon', 'Asia/Tokyo'],
+  seoul: ['Séoul', 'Corée du Sud', 'Asia/Seoul'],
+  shanghai: ['Shanghai', 'Chine', 'Asia/Shanghai'],
+  sydney: ['Sydney', 'Australie', 'Australia/Sydney'],
+  auckland: ['Auckland', 'Nouvelle-Zélande', 'Pacific/Auckland']
+};
+
+const page = location.pathname.split('/').pop();
+page === 'index.html' || page === '' ? renderMenu() : startClock();
+
+function renderMenu() {
+  const menu = document.querySelector('#clock-menu');
+  if (!menu) return;
+
+  menu.innerHTML = Object.entries(regions)
+    .map(([key, [name, country]]) => `
+      <a class="clock-button" href="clock.html?zone=${key}">
+        <h2>${name}</h2>
+        <p>${country}</p>
+      </a>
+    `)
+    .join('');
+}
+
+function getTimeParts(date, timeZone) {
+  const values = {};
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    fractionalSecondDigits: 3
+  });
+
+  formatter.formatToParts(date).forEach((part) => {
+    values[part.type] = part.value;
+  });
+
+  return {
+    year: Number(values.year),
+    month: Number(values.month),
+    day: Number(values.day),
+    hour: Number(values.hour),
+    minute: Number(values.minute),
+    second: Number(values.second),
+    ms: Number(values.fractionalSecond || 0)
+  };
+}
+
+function startClock() {
+  const zoneKey = new URLSearchParams(location.search).get('zone') || 'utc';
+  const [name, country, timeZone] = regions[zoneKey] || regions.utc;
+  const canvas = document.querySelector('#clock');
+  const context = canvas.getContext('2d');
+  const colors = {
+    milliseconds: '#ff79c6',
+    seconds: '#ff5267',
+    minutes: '#ffd34e',
+    hours: '#55e7cf',
+    days: '#70baff',
+    months: '#a98cff',
+    years: '#ffffff'
+  };
+
+  document.querySelector('#name').textContent = name;
+  document.querySelector('#country').textContent = country;
+  document.title = `Clock Expansion — ${name}`;
+
+  function circle(x, y, radius, color, width, alpha = 1) {
+    context.beginPath();
+    context.arc(x, y, radius, 0, Math.PI * 2);
+    context.strokeStyle = color;
+    context.lineWidth = width;
+    context.globalAlpha = alpha;
+    context.stroke();
+    context.globalAlpha = 1;
+  }
+
+  function number(value, x, y, color, size = 9) {
+    context.fillStyle = color;
+    context.font = `600 ${size}px system-ui`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(String(value), x, y);
+  }
+
+  function concentricWave(centerX, centerY, baseRadius, progress, color, width) {
+    // Chaque unité de temps crée une onde circulaire complète.
+    // L'onde grandit autour des cercles existants, sans spirale ni queue.
+    const waveRadius = baseRadius + progress * baseRadius * 0.22;
+    const pulse = 0.28 + 0.72 * (1 - progress);
+    circle(centerX, centerY, waveRadius, color, width + 2 * pulse, pulse);
+    circle(centerX, centerY, waveRadius + 7 * pulse, color, 1.5, pulse * 0.35);
+  }
+
+  function draw(time) {
+    const bounds = canvas.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    const width = bounds.width;
+    const height = bounds.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) * 0.34;
+
+    canvas.width = width * ratio;
+    canvas.height = height * ratio;
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    context.clearRect(0, 0, width, height);
+    context.globalCompositeOperation = 'lighter';
+
+    const secondProgress = (time.second + time.ms / 1000) / 60;
+    const minuteProgress = (time.minute + secondProgress) / 60;
+    const hourProgress = (time.hour % 24 + minuteProgress) / 24;
+    const dayProgress = (time.day - 1 + hourProgress) / 31;
+    const monthProgress = (time.month - 1 + dayProgress) / 12;
+    const yearProgress = (time.year % 100 + monthProgress) / 100;
+
+    // Cercles concentriques fixes : aucun trait radial, aucune spirale.
+    const layers = [
+      [radius * 0.16, colors.milliseconds, 2],
+      [radius * 0.29, colors.seconds, 2],
+      [radius * 0.43, colors.minutes, 2],
+      [radius * 0.58, colors.hours, 2.5],
+      [radius * 0.74, colors.days, 3],
+      [radius * 0.9, colors.months, 3.5],
+      [radius * 1.06, colors.years, 4]
+    ];
+
+    layers.forEach(([layerRadius, color, width]) => {
+      circle(centerX, centerY, layerRadius, color, width, 0.2);
+    });
+
+    // Une vague complète par fraction de l'unité temporelle correspondante.
+    concentricWave(centerX, centerY, radius * 0.16, time.ms / 1000, colors.milliseconds, 3);
+    concentricWave(centerX, centerY, radius * 0.29, secondProgress, colors.seconds, 3);
+    concentricWave(centerX, centerY, radius * 0.43, minuteProgress, colors.minutes, 3.5);
+    concentricWave(centerX, centerY, radius * 0.58, hourProgress, colors.hours, 4);
+    concentricWave(centerX, centerY, radius * 0.74, dayProgress % 1, colors.days, 4);
+    concentricWave(centerX, centerY, radius * 0.9, monthProgress % 1, colors.months, 4.5);
+    concentricWave(centerX, centerY, radius * 1.06, yearProgress % 1, colors.years, 5);
+
+    // Anneaux concentriques numérotés : toutes les valeurs sont lisibles autour des cercles.
+    for (let value = 1; value <= 60; value += 1) {
+      const angle = -Math.PI / 2 + value * Math.PI * 2 / 60;
+      const secondRadius = radius * (0.29 + value * 0.0022);
+      const minuteRadius = radius * (0.58 + value * 0.0022);
+      const secondActive = value === time.second + 1;
+      const minuteActive = value === time.minute + 1;
+
+      circle(centerX, centerY, secondRadius, colors.seconds, secondActive ? 3 : 1, secondActive ? 0.95 : 0.16);
+      circle(centerX, centerY, minuteRadius, colors.minutes, minuteActive ? 3.5 : 1.2, minuteActive ? 0.95 : 0.2);
+      number(value, centerX + Math.cos(angle) * secondRadius, centerY + Math.sin(angle) * secondRadius, colors.seconds, 7);
+      number(value, centerX + Math.cos(angle) * minuteRadius, centerY + Math.sin(angle) * minuteRadius, colors.minutes, 7);
+    }
+
+    for (let value = 1; value <= 24; value += 1) {
+      const angle = -Math.PI / 2 + value * Math.PI * 2 / 24;
+      const hourRadius = radius * 0.9;
+      const active = value === time.hour || value === time.hour + 1;
+      circle(centerX, centerY, hourRadius, colors.hours, active ? 3 : 1.2, active ? 0.9 : 0.2);
+      number(value, centerX + Math.cos(angle) * hourRadius, centerY + Math.sin(angle) * hourRadius, colors.hours, 9);
+    }
+
+    // Centre lumineux uniquement : aucun pointeur et aucune queue aiguillée.
+    const glow = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius * 0.22);
+    glow.addColorStop(0, 'rgba(255,255,255,0.95)');
+    glow.addColorStop(0.35, 'rgba(255,121,198,0.55)');
+    glow.addColorStop(1, 'rgba(255,121,198,0)');
+    context.fillStyle = glow;
+    context.beginPath();
+    context.arc(centerX, centerY, radius * 0.22, 0, Math.PI * 2);
+    context.fill();
+    context.globalCompositeOperation = 'source-over';
+  }
+
+  function update() {
+    const now = new Date();
+    const time = getTimeParts(now, timeZone);
+    document.querySelector('#time').textContent = `${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}:${String(time.second).padStart(2, '0')}.${String(time.ms).padStart(3, '0')}`;
+    document.querySelector('#date').textContent = new Intl.DateTimeFormat('fr', { timeZone, dateStyle: 'full' }).format(now);
+    draw(time);
+  }
+
+  update();
+  setInterval(update, 50);
+  window.addEventListener('resize', update);
+}
