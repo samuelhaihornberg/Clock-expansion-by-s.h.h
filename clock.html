@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#061018">
+  <link rel="stylesheet" href="styles.css">
+  <title>Clock Expansion — UTC</title>
+</head>
+<body>
+  <main class="app clock-page">
+    <nav class="nav"><a class="button" href="index.html">← Menu</a></nav>
+    <section class="panel stage">
+      <canvas id="clock" aria-label="Horloge visuelle"></canvas>
+      <div class="center">
+        <div id="name" class="zone">UTC</div>
+        <div id="country" class="zone">Monde</div>
+        <div id="time" class="time">00:00:00.000</div>
+        <div id="date" class="date">—</div>
+      </div>
+    </section>
+    <p class="caption">Vagues lumineuses et anneaux grandissants numérotés — aucune ADN, aucun pointillé.</p>
+    <section class="panel legend">
+      <span class="ms">Millisecondes</span>
+      <span class="seconds">60 anneaux de secondes</span>
+      <span class="minutes">60 anneaux de minutes</span>
+      <span class="hours">24 anneaux d’heures</span>
+      <span class="calendar">Jour · mois · année</span>
+    </section>
+  </main>
+  <script src="clock.js"></script>
+</body>
+</html>
