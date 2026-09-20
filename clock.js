@@ -65,8 +65,6 @@ function startClock() {
     ctx.fillText(String(value), x, y);
   }
 
-  // Une onde complète avance vers l'extérieur du futur : jamais de pointe,
-  // jamais de spirale, jamais de traînée. Chaque étape est un cercle entier.
   function futureWave(x, y, innerRadius, outerRadius, progress, color, width) {
     const radius = innerRadius + (outerRadius - innerRadius) * progress;
     const fade = 0.22 + 0.78 * (1 - progress);
@@ -77,14 +75,13 @@ function startClock() {
   function draw(time) {
     const box = canvas.getBoundingClientRect();
     const ratio = window.devicePixelRatio || 1;
-    const width = box.width;
-    const height = box.height;
+    const width = Math.max(1, box.width);
+    const height = Math.max(1, box.height);
     const x = width / 2;
     const y = height / 2;
-    const base = Math.min(width, height) * 0.105;
 
-    canvas.width = width * ratio;
-    canvas.height = height * ratio;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
     ctx.globalCompositeOperation = 'lighter';
@@ -96,6 +93,10 @@ function startClock() {
     const month = (time.month - 1 + day) / 12;
     const year = (time.year % 100 + month) / 100;
 
+    // Keep the complete outer ring inside the canvas, including its stroke.
+    const usableRadius = Math.max(40, Math.min(width, height) / 2 - 28);
+    const base = usableRadius / 12.4;
+
     const layers = [
       [base, base * 2.0, time.ms / 1000, colors.milliseconds, 2],
       [base * 2.0, base * 3.5, second, colors.seconds, 2.5],
@@ -106,14 +107,12 @@ function startClock() {
       [base * 10.6, base * 12.4, year % 1, colors.years, 4.5]
     ];
 
-    // Cercles concentriques fixes qui forment la mémoire de l'expansion.
     layers.forEach(([inner, outer, progress, color, width]) => {
       circle(x, y, inner, color, width, 0.18);
       circle(x, y, outer, color, 1, 0.08);
       futureWave(x, y, inner, outer, progress, color, width);
     });
 
-    // Anneaux 1–60, complets et numérotés : les valeurs avancent radialement.
     for (let value = 1; value <= 60; value += 1) {
       const angle = -Math.PI / 2 + value * Math.PI * 2 / 60;
       const secondRadius = base * 2.15 + value * base * 0.012;
@@ -127,7 +126,6 @@ function startClock() {
       label(value, x + Math.cos(angle) * minuteRadius, y + Math.sin(angle) * minuteRadius, colors.minutes, 7);
     }
 
-    // Anneau des 24 heures, lui aussi entièrement circulaire et numéroté.
     const hourRadius = base * 8.9;
     for (let value = 1; value <= 24; value += 1) {
       const angle = -Math.PI / 2 + value * Math.PI * 2 / 24;
@@ -136,7 +134,6 @@ function startClock() {
       label(value, x + Math.cos(angle) * hourRadius, y + Math.sin(angle) * hourRadius, colors.hours, 9);
     }
 
-    // Centre circulaire sans aiguille.
     const glow = ctx.createRadialGradient(x, y, 0, x, y, base * 1.5);
     glow.addColorStop(0, 'rgba(255,255,255,0.9)');
     glow.addColorStop(0.35, 'rgba(255,121,198,0.42)');
