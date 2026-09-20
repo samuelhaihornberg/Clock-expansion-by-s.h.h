@@ -16,15 +16,16 @@
         <button id="fullscreen-button" class="fullscreen-button" type="button" aria-label="Afficher l’horloge en plein écran" aria-pressed="false">⛶</button>
       </div>
     </div>
+    <header class="time-banner" aria-live="polite">
+      <div id="name" class="banner-zone">UTC</div>
+      <div id="country" class="banner-zone">Monde</div>
+      <div id="time" class="banner-time">00:00:00.000</div>
+      <div id="date" class="banner-date">—</div>
+      <div id="display-mode-label" class="banner-mode">Horloge</div>
+    </header>
     <section class="stage" aria-label="Horloge concentrique plein écran">
       <canvas id="clock" aria-label="Horloge visuelle"></canvas>
-      <div class="center">
-        <div id="name" class="zone">UTC</div>
-        <div id="country" class="zone">Monde</div>
-        <div id="time" class="time">00:00:00.000</div>
-        <div id="date" class="date">—</div>
-        <div id="display-mode-label" class="mode-label">Horloge</div>
-      </div>
+      <div class="center" aria-hidden="true"><span class="center-mark"></span></div>
     </section>
   </main>
   <script src="clock.js"></script>
@@ -34,22 +35,17 @@
       const modeButton = document.querySelector('#display-mode-button');
       const screen = document.querySelector('.clock-screen');
       const modeLabel = document.querySelector('#display-mode-label');
-
       fullscreenButton?.addEventListener('click', async () => {
         try {
           if (document.fullscreenElement) await document.exitFullscreen();
           else await screen.requestFullscreen();
-        } catch (_) {
-          fullscreenButton.setAttribute('aria-label', 'Plein écran indisponible sur cet appareil');
-        }
+        } catch (_) { fullscreenButton.setAttribute('aria-label', 'Plein écran indisponible sur cet appareil'); }
       });
-
       document.addEventListener('fullscreenchange', () => {
         const active = Boolean(document.fullscreenElement);
         fullscreenButton?.setAttribute('aria-pressed', String(active));
         if (fullscreenButton) fullscreenButton.textContent = active ? '×' : '⛶';
       });
-
       modeButton?.addEventListener('click', () => {
         const calendar = document.body.classList.toggle('calendar-mode');
         modeButton.textContent = calendar ? 'Horloge' : 'Calendrier';

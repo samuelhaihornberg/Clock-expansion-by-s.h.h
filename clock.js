@@ -17,13 +17,11 @@ function renderMenu() {
   if (!menu) return;
   menu.innerHTML = Object.entries(regions).map(([key, [name]]) => `<a class="clock-button" href="clock.html?zone=${key}"><h2>${name}</h2></a>`).join('');
 }
-
 function getTimeParts(date, timeZone) {
   const values = {};
   new Intl.DateTimeFormat('en-US', { timeZone, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 }).formatToParts(date).forEach((part) => { values[part.type] = part.value; });
   return { year: +values.year, month: +values.month, day: +values.day, hour: +values.hour, minute: +values.minute, second: +values.second, ms: +(values.fractionalSecond || 0) };
 }
-
 function daysInMonth(year, month) { return new Date(Date.UTC(year, month, 0)).getUTCDate(); }
 
 function startClock() {
@@ -31,7 +29,7 @@ function startClock() {
   const [name, country, timeZone] = regions[key] || regions.utc;
   const canvas = document.querySelector('#clock');
   const context = canvas.getContext('2d');
-  const colors = { milliseconds: '#ff79c6', seconds: '#ff5267', minutes: '#ffd34e', hours: '#55e7cf', days: '#70baff', months: '#a98cff', years: '#ffffff' };
+  const colors = { ms: '#ff79c6', seconds: '#ff5267', minutes: '#ffd34e', hours: '#55e7cf', days: '#70baff', months: '#a98cff', years: '#ffffff' };
   let calendarMode = false;
   document.querySelector('#name').textContent = name;
   document.querySelector('#country').textContent = country;
@@ -41,13 +39,34 @@ function startClock() {
   function circle(x, y, radius, color, width, alpha = 1) {
     context.beginPath(); context.arc(x, y, radius, 0, Math.PI * 2); context.strokeStyle = color; context.lineWidth = width; context.globalAlpha = alpha; context.stroke(); context.globalAlpha = 1;
   }
-  function number(value, x, y, color, size = 9) {
+  function label(value, x, y, color, size = 9) {
     context.fillStyle = color; context.font = `600 ${size}px system-ui`; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(String(value), x, y);
   }
   function wave(x, y, inner, outer, progress, color, width) {
-    const radius = inner + (outer - inner) * Math.max(0, Math.min(1, progress));
-    const fade = 0.22 + 0.78 * (1 - Math.max(0, Math.min(1, progress)));
-    circle(x, y, radius, color, width + 2 * (1 - fade), fade);
+    const p = Math.max(0, Math.min(1, progress));
+    circle(x, y, inner + (outer - inner) * p, color, width + 2 * (1 - p), 0.22 + 0.78 * (1 - p));
+  }
+  function plusLaser(x, y, radius, progress, color) {
+    const reach = Math.max(10, radius * Math.max(0.08, Math.min(1, progress)));
+    context.save();
+    context.globalCompositeOperation = 'lighter';
+    context.strokeStyle = color;
+    context.shadowColor = color;
+    context.shadowBlur = 18;
+    context.globalAlpha = 0.9;
+    context.lineWidth = Math.max(2, Math.min(8, radius * 0.018));
+    context.beginPath(); context.moveTo(x - reach, y); context.lineTo(x + reach, y); context.moveTo(x, y - reach); context.lineTo(x, y + reach); context.stroke();
+    context.shadowBlur = 4; context.globalAlpha = 1; context.lineWidth = 1.5;
+    context.beginPath(); context.moveTo(x - reach, y); context.lineTo(x + reach, y); context.moveTo(x, y - reach); context.lineTo(x, y + reach); context.stroke();
+    context.restore();
+  }
+  function numberedRing(x, y, radius, count, color, active, size, yearLabels = false) {
+    circle(x, y, radius, color, active ? 2.8 : 0.8, active ? 0.9 : 0.12);
+    for (let value = 1; value <= count; value += 1) {
+      const angle = -Math.PI / 2 + (value / count) * Math.PI * 2;
+      const labelSize = yearLabels ? (value % 10 === 0 || value === active ? size : 5) : size;
+      label(yearLabels ? value : value, x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, color, labelSize);
+    }
   }
 
   function draw(time) {
@@ -55,62 +74,43 @@ function startClock() {
     const ratio = window.devicePixelRatio || 1;
     const width = Math.max(1, box.width), height = Math.max(1, box.height);
     const x = width / 2, y = height / 2;
-    const usable = Math.max(40, Math.min(width, height) / 2 - 34);
+    const usable = Math.max(40, Math.min(width, height) / 2 - 38);
     const base = usable / 13.8;
     const dayCount = daysInMonth(time.year, time.month);
-    const dayProgress = (time.day - 1 + (time.hour + time.minute / 60) / 24) / dayCount;
-    const monthProgress = (time.month - 1 + dayProgress) / 12;
-    const yearProgress = (time.year - YEAR_START + monthProgress) / (YEAR_END - YEAR_START + 1);
-
-    canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
-    context.setTransform(ratio, 0, 0, ratio, 0, 0); context.clearRect(0, 0, width, height); context.globalCompositeOperation = 'lighter';
     const second = (time.second + time.ms / 1000) / 60;
     const minute = (time.minute + second) / 60;
     const hour = (time.hour % 24 + minute) / 24;
+    const day = (time.day - 1 + (time.hour + time.minute / 60) / 24) / dayCount;
+    const month = (time.month - 1 + day) / 12;
+    const year = (time.year - YEAR_START + month) / (YEAR_END - YEAR_START + 1);
+    const outer = base * 13.5;
 
-    const rings = [
-      [base, base * 2, time.ms / 1000, colors.milliseconds, 2],
-      [base * 2, base * 3.5, second, colors.seconds, 2.5],
-      [base * 3.5, base * 5.2, minute, colors.minutes, 3],
-      [base * 5.2, base * 7, hour, colors.hours, 3],
-      [base * 7, base * 8.8, dayProgress, colors.days, 3.5],
-      [base * 8.8, base * 10.6, monthProgress, colors.months, 4],
-      [base * 10.6, base * 13.6, yearProgress, colors.years, 4.5]
+    canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
+    context.setTransform(ratio, 0, 0, ratio, 0, 0); context.clearRect(0, 0, width, height); context.globalCompositeOperation = 'lighter';
+    const rings = calendarMode ? [
+      [base, base * 2, day, colors.days, 2.5], [base * 2, base * 4.3, month, colors.months, 3.5], [base * 4.3, base * 13.5, year, colors.years, 4.5]
+    ] : [
+      [base, base * 2, time.ms / 1000, colors.ms, 2], [base * 2, base * 4.3, second, colors.seconds, 2.5], [base * 4.3, base * 7, minute, colors.minutes, 3], [base * 7, base * 10, hour, colors.hours, 3.5]
     ];
-    rings.forEach(([inner, outer, progress, color, width]) => { circle(x, y, inner, color, width, 0.18); circle(x, y, outer, color, 1, 0.08); wave(x, y, inner, outer, progress, color, width); });
+    rings.forEach(([inner, outerRadius, progress, color, widthValue]) => { circle(x, y, inner, color, widthValue, 0.18); circle(x, y, outerRadius, color, 1, 0.08); wave(x, y, inner, outerRadius, progress, color, widthValue); });
 
-    if (!calendarMode) {
-      for (let value = 1; value <= 60; value += 1) {
-        const angle = -Math.PI / 2 + value * Math.PI * 2 / 60;
-        const radius = base * 2.35 + value * base * 0.01;
-        number(value, x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, colors.seconds, 6);
-      }
+    if (calendarMode) {
+      numberedRing(x, y, base * 2.25, dayCount, colors.days, time.day, 8);
+      numberedRing(x, y, base * 5.0, 12, colors.months, time.month, 9);
+      numberedRing(x, y, base * 12.8, YEAR_END - YEAR_START + 1, colors.years, time.year, 5, true);
+      plusLaser(x, y, outer, year);
     } else {
-      for (let value = 1; value <= dayCount; value += 1) {
-        const angle = -Math.PI / 2 + (value / dayCount) * Math.PI * 2;
-        const radius = base * 8.2;
-        number(value, x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, colors.days, 8);
-      }
-      for (let value = 1; value <= 12; value += 1) {
-        const angle = -Math.PI / 2 + (value / 12) * Math.PI * 2;
-        const radius = base * 10.2;
-        number(value, x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, colors.months, 8);
-      }
-    }
-
-    for (let value = YEAR_START; value <= YEAR_END; value += 1) {
-      const angle = -Math.PI / 2 + ((value - YEAR_START) / (YEAR_END - YEAR_START + 1)) * Math.PI * 2;
-      const radius = base * 12.8;
-      const active = value === time.year;
-      circle(x, y, radius, colors.years, active ? 3 : 0.7, active ? 0.92 : 0.07);
-      number(value, x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, colors.years, active ? 8 : 5);
+      numberedRing(x, y, base * 2.25, 1000, colors.ms, Math.floor(time.ms), 4);
+      numberedRing(x, y, base * 4.9, 60, colors.seconds, time.second, 7);
+      numberedRing(x, y, base * 7.6, 60, colors.minutes, time.minute, 7);
+      numberedRing(x, y, base * 10.5, 24, colors.hours, time.hour, 8);
+      plusLaser(x, y, outer, hour, colors.hours);
     }
 
     const glow = context.createRadialGradient(x, y, 0, x, y, base * 1.5);
     glow.addColorStop(0, 'rgba(255,255,255,0.9)'); glow.addColorStop(0.35, 'rgba(255,121,198,0.42)'); glow.addColorStop(1, 'rgba(255,121,198,0)');
     context.fillStyle = glow; context.beginPath(); context.arc(x, y, base * 1.5, 0, Math.PI * 2); context.fill(); context.globalCompositeOperation = 'source-over';
   }
-
   function update() {
     const now = new Date(); const time = getTimeParts(now, timeZone);
     document.querySelector('#time').textContent = `${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}:${String(time.second).padStart(2, '0')}.${String(time.ms).padStart(3, '0')}`;
