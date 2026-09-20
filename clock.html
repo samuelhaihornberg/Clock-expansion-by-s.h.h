@@ -9,7 +9,10 @@
 </head>
 <body class="clock-body">
   <main class="clock-screen">
-    <a class="back-button" href="index.html" aria-label="Retour au choix des horloges">←</a>
+    <div class="clock-controls" aria-label="Commandes de l’horloge">
+      <a class="back-button" href="index.html" aria-label="Retour au choix des horloges">←</a>
+      <button id="fullscreen-button" class="fullscreen-button" type="button" aria-label="Afficher l’horloge en plein écran" aria-pressed="false">⛶</button>
+    </div>
     <section class="stage" aria-label="Horloge concentrique plein écran">
       <canvas id="clock" aria-label="Horloge visuelle"></canvas>
       <div class="center">
@@ -21,5 +24,32 @@
     </section>
   </main>
   <script src="clock.js"></script>
+  <script>
+    (() => {
+      const button = document.querySelector('#fullscreen-button');
+      if (!button) return;
+      const fullscreenElement = document.querySelector('.clock-screen');
+
+      function updateFullscreenButton() {
+        const active = Boolean(document.fullscreenElement);
+        button.setAttribute('aria-pressed', String(active));
+        button.textContent = active ? '×' : '⛶';
+        button.setAttribute('aria-label', active ? 'Quitter le plein écran' : 'Afficher l’horloge en plein écran');
+      }
+
+      button.addEventListener('click', async () => {
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+          else if (fullscreenElement.requestFullscreen) await fullscreenElement.requestFullscreen();
+        } catch (error) {
+          button.setAttribute('aria-label', 'Le plein écran n’est pas disponible sur cet appareil');
+        }
+        updateFullscreenButton();
+      });
+
+      document.addEventListener('fullscreenchange', updateFullscreenButton);
+      updateFullscreenButton();
+    })();
+  </script>
 </body>
 </html>

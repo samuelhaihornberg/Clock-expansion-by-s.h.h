@@ -33,69 +33,23 @@ body { overflow: hidden; }
 .logo { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(135deg, var(--yellow), var(--green)); color: #061018; font-weight: 900; }
 h1 { margin: 0; font-size: clamp(1.1rem, 3vw, 2rem); letter-spacing: .08em; text-transform: uppercase; }
 
-.clock-menu {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
-  gap: clamp(10px, 2vw, 18px);
-}
-
-.clock-button {
-  display: grid;
-  place-items: center;
-  min-height: clamp(76px, 12vw, 120px);
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: #0d202bcc;
-  color: var(--text);
-  text-align: center;
-  text-decoration: none;
-  box-shadow: 0 12px 30px #0008;
-  transition: transform .2s, border-color .2s, background .2s;
-}
+.clock-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: clamp(10px, 2vw, 18px); }
+.clock-button { display: grid; place-items: center; min-height: clamp(76px, 12vw, 120px); padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: #0d202bcc; color: var(--text); text-align: center; text-decoration: none; box-shadow: 0 12px 30px #0008; transition: transform .2s, border-color .2s, background .2s; }
 .clock-button:hover, .clock-button:focus-visible { transform: translateY(-3px); border-color: var(--green); background: #55e7cf20; outline: none; }
 .clock-button h2 { margin: 0; font-size: clamp(1rem, 2.4vw, 1.35rem); }
 .clock-button p { display: none; }
 
-.clock-screen {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  height: 100svh;
-  min-height: 320px;
-  overflow: hidden;
-}
-
-.stage {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
+.clock-screen { position: relative; width: 100vw; height: 100vh; height: 100svh; min-height: 320px; overflow: hidden; }
+.stage { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; }
 .stage canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
 .center { position: relative; z-index: 1; max-width: 92%; text-align: center; pointer-events: none; }
 .zone, .date { color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-size: clamp(.62rem, 1.8vw, .85rem); }
 .time { font-size: clamp(1.4rem, 7.5vw, 6rem); font-weight: 800; line-height: 1.05; white-space: nowrap; text-shadow: 0 0 28px #55e7cf88; }
 
-.back-button {
-  position: fixed;
-  z-index: 5;
-  top: max(12px, env(safe-area-inset-top));
-  left: max(12px, env(safe-area-inset-left));
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: #061018aa;
-  color: var(--text);
-  font-size: 1.35rem;
-  text-decoration: none;
-  backdrop-filter: blur(8px);
-}
-.back-button:hover, .back-button:focus-visible { border-color: var(--green); outline: none; }
+.clock-controls { position: fixed; z-index: 5; inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) auto max(12px, env(safe-area-inset-left)); display: flex; justify-content: space-between; pointer-events: none; }
+.back-button, .fullscreen-button { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 50%; background: #061018aa; color: var(--text); font: inherit; font-size: 1.35rem; text-decoration: none; cursor: pointer; backdrop-filter: blur(8px); pointer-events: auto; }
+.fullscreen-button { font-size: 1.5rem; }
+.back-button:hover, .back-button:focus-visible, .fullscreen-button:hover, .fullscreen-button:focus-visible { border-color: var(--green); outline: none; }
 
 @media (max-width: 600px) {
   .menu-screen { padding: max(16px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
@@ -110,6 +64,4 @@ h1 { margin: 0; font-size: clamp(1.1rem, 3vw, 2rem); letter-spacing: .08em; text
   .time { font-size: clamp(1.25rem, 6vw, 4rem); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .clock-button { transition: none; }
-}
+@media (prefers-reduced-motion: reduce) { .clock-button { transition: none; } }
