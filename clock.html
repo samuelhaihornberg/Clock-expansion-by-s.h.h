@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#061018">
   <link rel="stylesheet" href="styles.css">
   <title>Clock Expansion — UTC</title>
@@ -10,7 +10,7 @@
 <body>
   <main class="app clock-page">
     <nav class="nav"><a class="button" href="index.html">← Menu</a></nav>
-    <section class="panel stage">
+    <section class="panel stage" aria-label="Horloge concentrique plein écran">
       <canvas id="clock" aria-label="Horloge visuelle"></canvas>
       <div class="center">
         <div id="name" class="zone">UTC</div>
@@ -19,7 +19,7 @@
         <div id="date" class="date">—</div>
       </div>
     </section>
-    <p class="caption">Vagues lumineuses et anneaux grandissants numérotés — aucune ADN, aucun pointillé.</p>
+    <p class="caption">Vagues concentriques lumineuses — affichage adapté à tous les écrans.</p>
     <section class="panel legend">
       <span class="ms">Millisecondes</span>
       <span class="seconds">60 anneaux de secondes</span>
