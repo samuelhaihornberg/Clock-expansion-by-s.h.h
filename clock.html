@@ -11,7 +11,10 @@
   <main class="clock-screen">
     <div class="clock-controls" aria-label="Commandes de l’horloge">
       <a class="back-button" href="index.html" aria-label="Retour au choix des horloges">←</a>
-      <button id="fullscreen-button" class="fullscreen-button" type="button" aria-label="Afficher l’horloge en plein écran" aria-pressed="false">⛶</button>
+      <div class="control-group">
+        <button id="display-mode-button" class="mode-button" type="button" aria-pressed="false">Calendrier</button>
+        <button id="fullscreen-button" class="fullscreen-button" type="button" aria-label="Afficher l’horloge en plein écran" aria-pressed="false">⛶</button>
+      </div>
     </div>
     <section class="stage" aria-label="Horloge concentrique plein écran">
       <canvas id="clock" aria-label="Horloge visuelle"></canvas>
@@ -20,35 +23,40 @@
         <div id="country" class="zone">Monde</div>
         <div id="time" class="time">00:00:00.000</div>
         <div id="date" class="date">—</div>
+        <div id="display-mode-label" class="mode-label">Horloge</div>
       </div>
     </section>
   </main>
   <script src="clock.js"></script>
   <script>
     (() => {
-      const button = document.querySelector('#fullscreen-button');
-      if (!button) return;
-      const fullscreenElement = document.querySelector('.clock-screen');
+      const fullscreenButton = document.querySelector('#fullscreen-button');
+      const modeButton = document.querySelector('#display-mode-button');
+      const screen = document.querySelector('.clock-screen');
+      const modeLabel = document.querySelector('#display-mode-label');
 
-      function updateFullscreenButton() {
-        const active = Boolean(document.fullscreenElement);
-        button.setAttribute('aria-pressed', String(active));
-        button.textContent = active ? '×' : '⛶';
-        button.setAttribute('aria-label', active ? 'Quitter le plein écran' : 'Afficher l’horloge en plein écran');
-      }
-
-      button.addEventListener('click', async () => {
+      fullscreenButton?.addEventListener('click', async () => {
         try {
           if (document.fullscreenElement) await document.exitFullscreen();
-          else if (fullscreenElement.requestFullscreen) await fullscreenElement.requestFullscreen();
-        } catch (error) {
-          button.setAttribute('aria-label', 'Le plein écran n’est pas disponible sur cet appareil');
+          else await screen.requestFullscreen();
+        } catch (_) {
+          fullscreenButton.setAttribute('aria-label', 'Plein écran indisponible sur cet appareil');
         }
-        updateFullscreenButton();
       });
 
-      document.addEventListener('fullscreenchange', updateFullscreenButton);
-      updateFullscreenButton();
+      document.addEventListener('fullscreenchange', () => {
+        const active = Boolean(document.fullscreenElement);
+        fullscreenButton?.setAttribute('aria-pressed', String(active));
+        if (fullscreenButton) fullscreenButton.textContent = active ? '×' : '⛶';
+      });
+
+      modeButton?.addEventListener('click', () => {
+        const calendar = document.body.classList.toggle('calendar-mode');
+        modeButton.textContent = calendar ? 'Horloge' : 'Calendrier';
+        modeButton.setAttribute('aria-pressed', String(calendar));
+        if (modeLabel) modeLabel.textContent = calendar ? 'Calendrier' : 'Horloge';
+        window.dispatchEvent(new CustomEvent('clock-display-mode', { detail: { calendar } }));
+      });
     })();
   </script>
 </body>
