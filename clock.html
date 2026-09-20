@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="styles.css">
   <title>Clock Expansion — UTC</title>
 </head>
-<body>
-  <main class="app clock-page">
-    <nav class="nav"><a class="button" href="index.html">← Menu</a></nav>
-    <section class="panel stage" aria-label="Horloge concentrique plein écran">
+<body class="clock-body">
+  <main class="clock-screen">
+    <a class="back-button" href="index.html" aria-label="Retour au choix des horloges">←</a>
+    <section class="stage" aria-label="Horloge concentrique plein écran">
       <canvas id="clock" aria-label="Horloge visuelle"></canvas>
       <div class="center">
         <div id="name" class="zone">UTC</div>
@@ -18,14 +18,6 @@
         <div id="time" class="time">00:00:00.000</div>
         <div id="date" class="date">—</div>
       </div>
-    </section>
-    <p class="caption">Vagues concentriques lumineuses — affichage adapté à tous les écrans.</p>
-    <section class="panel legend">
-      <span class="ms">Millisecondes</span>
-      <span class="seconds">60 anneaux de secondes</span>
-      <span class="minutes">60 anneaux de minutes</span>
-      <span class="hours">24 anneaux d’heures</span>
-      <span class="calendar">Jour · mois · année</span>
     </section>
   </main>
   <script src="clock.js"></script>
