@@ -1,67 +1,26 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#061018">
-  <link rel="stylesheet" href="styles.css?v=2026-09-20-01">
-  <title>Clock Expansion — UTC</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061018">
+<link rel="stylesheet" href="styles.css?v=20260920fix">
+<title>Clock Expansion — UTC</title>
 </head>
 <body class="clock-body">
-  <main class="clock-screen">
-    <div class="clock-controls" aria-label="Commandes de l’horloge">
-      <a class="back-button" href="index.html" aria-label="Retour au choix des horloges">←</a>
-      <div class="control-group">
-        <button id="display-mode-button" class="mode-button" type="button" aria-pressed="false">Calendrier</button>
-        <button id="fullscreen-button" class="fullscreen-button" type="button" aria-label="Afficher l’horloge en plein écran" aria-pressed="false">⛶</button>
-      </div>
-    </div>
-    <header class="time-banner" aria-live="polite">
-      <div id="name" class="banner-zone">UTC</div>
-      <div id="country" class="banner-zone country-zone">Monde</div>
-      <div id="time" class="banner-time">00:00:00.000</div>
-      <div id="date" class="banner-date">—</div>
-      <div id="display-mode-label" class="banner-mode">Horloge</div>
-    </header>
-    <section class="stage" aria-label="Horloge concentrique plein écran">
-      <canvas id="clock" aria-label="Horloge visuelle"></canvas>
-      <div class="center" aria-hidden="true"><span class="center-mark"></span></div>
-    </section>
-  </main>
-  <script src="clock.js?v=2026-09-20-01"></script>
-  <script>
-    (() => {
-      const fullscreenButton = document.querySelector('#fullscreen-button');
-      const modeButton = document.querySelector('#display-mode-button');
-      const screen = document.querySelector('.clock-screen');
-      const modeLabel = document.querySelector('#display-mode-label');
-
-      fullscreenButton?.addEventListener('click', async () => {
-        try {
-          if (document.fullscreenElement) await document.exitFullscreen();
-          else await screen.requestFullscreen();
-        } catch (_) {
-          fullscreenButton.setAttribute('aria-label', 'Plein écran indisponible sur cet appareil');
-        }
-      });
-
-      document.addEventListener('fullscreenchange', () => {
-        const active = Boolean(document.fullscreenElement);
-        fullscreenButton?.setAttribute('aria-pressed', String(active));
-        if (fullscreenButton) fullscreenButton.textContent = active ? '×' : '⛶';
-      });
-
-      modeButton?.addEventListener('click', () => {
-        const calendar = document.body.classList.toggle('calendar-mode');
-        modeButton.textContent = calendar ? 'Horloge' : 'Calendrier';
-        modeButton.setAttribute('aria-pressed', String(calendar));
-        if (modeLabel) modeLabel.textContent = calendar ? 'Calendrier' : 'Horloge';
-        window.dispatchEvent(new CustomEvent('clock-display-mode', { detail: { calendar } }));
-      });
-    })();
-  </script>
+<main class="clock-screen">
+<div class="clock-controls"><a class="back-button" href="index.html" aria-label="Retour">←</a><div class="control-group"><button id="mode-button" class="mode-button" type="button">Calendrier</button><button id="fullscreen-button" class="fullscreen-button" type="button" aria-label="Plein écran">⛶</button></div></div>
+<header class="time-banner"><strong id="name">UTC</strong><span id="country">Monde</span><strong id="time">00:00:00.000</strong><span id="date">—</span></header>
+<section class="stage" aria-label="Horloge concentrique"><canvas id="clock"></canvas><span class="center-mark" aria-hidden="true"></span></section>
+</main>
+<script src="clock.js?v=20260920fix" defer></script>
+<script>
+window.addEventListener('DOMContentLoaded',()=>{
+ const screen=document.querySelector('.clock-screen'), mode=document.querySelector('#mode-button'), full=document.querySelector('#fullscreen-button');
+ mode.addEventListener('click',()=>{const calendar=document.body.classList.toggle('calendar-mode');mode.textContent=calendar?'Horloge':'Calendrier';window.dispatchEvent(new CustomEvent('clock-mode',{detail:{calendar}}));});
+ full.addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await screen.requestFullscreen();}catch(e){}});
+ document.addEventListener('fullscreenchange',()=>{full.textContent=document.fullscreenElement?'×':'⛶';});
+});
+</script>
 </body>
 </html>
