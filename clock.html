@@ -4,19 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#061018">
-<link rel="stylesheet" href="styles.css?v=20260920rings">
+<link rel="stylesheet" href="styles.css?v=20260920radial">
 <title>Clock Expansion — UTC</title>
 </head>
 <body class="clock-body">
 <main class="clock-screen">
 <div class="clock-controls"><a class="back-button" href="index.html" aria-label="Retour">←</a><div class="control-group"><button id="mode-button" class="mode-button" type="button">Calendrier</button><button id="fullscreen-button" class="fullscreen-button" type="button" aria-label="Plein écran">⛶</button></div></div>
 <header class="time-banner"><strong id="name">UTC</strong><span id="country">Monde</span><strong id="time">00:00:00.000</strong><span id="date">—</span></header>
-<section class="stage" aria-label="Anneaux concentriques néon"><canvas id="clock"></canvas></section>
+<section class="stage" aria-label="Progression radiale néon"><canvas id="clock"></canvas></section>
 </main>
-<script src="clock.js?v=20260920rings" defer></script>
+<script src="clock.js?v=20260920radial" defer></script>
 <script>
 window.addEventListener('DOMContentLoaded',()=>{
- const screen=document.querySelector('.clock-screen'),mode=document.querySelector('#mode-button'),full=document.querySelector('#fullscreen-button');
+ const screen=document.querySelector('.clock-screen'), mode=document.querySelector('#mode-button'), full=document.querySelector('#fullscreen-button');
  mode?.addEventListener('click',()=>{const calendar=document.body.classList.toggle('calendar-mode');mode.textContent=calendar?'Horloge':'Calendrier';window.dispatchEvent(new CustomEvent('clock-mode',{detail:{calendar}}));});
  full?.addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await screen.requestFullscreen();}catch(_){}});
  document.addEventListener('fullscreenchange',()=>{if(full)full.textContent=document.fullscreenElement?'×':'⛶';});
