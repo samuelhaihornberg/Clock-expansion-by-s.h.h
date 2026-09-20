@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Clock Expansion — Coff Container</title>
+  <style>
+    :root {
+      --bg: #050b12;
+      --panel: #0d202b;
+      --line: #b7e2f233;
+      --text: #effbff;
+      --muted: #9ab7c5;
+      --pink: #ff79c6;
+      --red: #ff5267;
+      --yellow: #ffd34e;
+      --green: #55e7cf;
+      --blue: #70baff;
+      --violet: #a98cff;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: radial-gradient(circle at top, #1d4d5d, #050b12 48%, #020609);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+    }
+
+    body {
+      padding: 20px;
+    }
+
+    .app {
+      max-width: 1300px;
+      margin: auto;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--yellow), var(--green));
+      color: #061018;
+      font-weight: 900;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 2.3vw, 2rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--green);
+      background: rgba(85, 231, 207, 0.12);
+    }
+
+    .panel {
+      background: rgba(13, 32, 43, 0.86);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .stage {
+      position: relative;
+      height: min(72vh, 700px);
+      min-height: 420px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+
+    .stage canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .center {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .zone {
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+
+    .time {
+      font-size: clamp(2.2rem, 7vw, 5.8rem);
+      font-weight: 800;
+      text-shadow: 0 0 30px rgba(85, 231, 207, 0.7);
+    }
+
+    .date {
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+      padding: 18px;
+    }
+
+    .legend span {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.02);
+      font-size: 0.85rem;
+    }
+
+    .ms { color: var(--pink); }
+    .seconds { color: var(--red); }
+    .minutes { color: var(--yellow); }
+    .hours { color: var(--green); }
+    .calendar { color: var(--blue); }
+    .year { color: var(--violet); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">V</div>
+        <h1>Clock Expansion</h1>
+      </div>
+      <div class="nav">
+        <button id="back">Menu</button>
+        <button id="coff">Coff</button>
+      </div>
+    </header>
+
+    <section class="panel stage">
+      <canvas id="clock"></canvas>
+      <div class="center">
+        <div id="name" class="zone">UTC</div>
+        <div id="country" class="zone">Monde</div>
+        <div id="time" class="time">00:00:00.000</div>
+        <div id="date" class="date">—</div>
+      </div>
+    </section>
+
+    <section class="panel legend">
+      <span class="ms">● Millisecondes</span>
+      <span class="seconds">● 60 anneaux de secondes</span>
+      <span class="minutes">● 60 anneaux de minutes</span>
+      <span class="hours">● 24 anneaux d’heures</span>
+      <span class="calendar">● Jour · mois · année</span>
+      <span class="year">● Vagues photoplasma</span>
+    </section>
+  </div>
+
+  <co name="meta" type="section" role="document">
+    <co name="title" value="Clock Expansion" />
+    <co name="lang" value="fr" />
+    <co name="module" value="coff" />
+    <co name="connections" value="full" />
+  </co>
+
+  <co name="css" type="code" role="style">
+    :root {
+      --bg: #050b12;
+      --panel: #0d202b;
+      --line: #b7e2f233;
+      --text: #effbff;
+      --muted: #9ab7c5;
+      --pink: #ff79c6;
+      --red: #ff5267;
+      --yellow: #ffd34e;
+      --green: #55e7cf;
+      --blue: #70baff;
+      --violet: #a98cff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: radial-gradient(circle at top, #1d4d5d, #050b12 48%, #020609); color: var(--text); font-family: system-ui, sans-serif; }
+    body { padding: 20px; }
+    .app { max-width: 1300px; margin: auto; }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .logo { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--yellow), var(--green)); color: #061018; font-weight: 900; }
+    h1 { margin: 0; font-size: clamp(1.2rem, 2.3vw, 2rem); letter-spacing: 0.08em; text-transform: uppercase; }
+    .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    button { border: 1px solid var(--line); background: rgba(255,255,255,0.04); color: var(--text); padding: 10px 14px; border-radius: 999px; font: inherit; cursor: pointer; }
+    button:hover { border-color: var(--green); background: rgba(85, 231, 207, 0.12); }
+    .panel { background: rgba(13, 32, 43, 0.86); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 18px 50px rgba(0,0,0,0.5); backdrop-filter: blur(12px); }
+    .stage { position: relative; height: min(72vh, 700px); min-height: 420px; overflow: hidden; display: grid; place-items: center; }
+    .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .center { position: relative; z-index: 1; text-align: center; pointer-events: none; }
+    .zone { color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.8rem; }
+    .time { font-size: clamp(2.2rem, 7vw, 5.8rem); font-weight: 800; text-shadow: 0 0 30px rgba(85, 231, 207, 0.7); }
+    .date { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 14px; padding: 18px; }
+    .legend span { border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 12px; background: rgba(255,255,255,0.02); font-size: 0.85rem; }
+    .ms { color: var(--pink); }
+    .seconds { color: var(--red); }
+    .minutes { color: var(--yellow); }
+    .hours { color: var(--green); }
+    .calendar { color: var(--blue); }
+    .year { color: var(--violet); }
+  </co>
+
+  <co name="javascript" type="code" role="runtime">
+    const regions = {
+      utc: { name: 'UTC', country: 'Monde', tz: 'UTC' },
+      paris: { name: 'Paris', country: 'France', tz: 'Europe/Paris' },
+      london: { name: 'Londres', country: 'Royaume-Uni', tz: 'Europe/London' },
+      newyork: { name: 'New York', country: 'États-Unis', tz: 'America/New_York' },
+      losangeles: { name: 'Los Angeles', country: 'États-Unis', tz: 'America/Los_Angeles' },
+      mexico: { name: 'Mexico', country: 'Mexique', tz: 'America/Mexico_City' },
+      saopaulo: { name: 'São Paulo', country: 'Brésil', tz: 'America/Sao_Paulo' },
+      cairo: { name: 'Le Caire', country: 'Égypte', tz: 'Africa/Cairo' },
+      johannesburg: { name: 'Johannesburg', country: 'Afrique du Sud', tz: 'Africa/Johannesburg' },
+      dubai: { name: 'Dubai', country: 'Émirats', tz: 'Asia/Dubai' },
+      mumbai: { name: 'Mumbai', country: 'Inde', tz: 'Asia/Kolkata' },
+      singapore: { name: 'Singapore', country: 'Singapour', tz: 'Asia/Singapore' },
+      tokyo: { name: 'Tokyo', country: 'Japon', tz: 'Asia/Tokyo' },
+      seoul: { name: 'Séoul', country: 'Corée du Sud', tz: 'Asia/Seoul' },
+      shanghai: { name: 'Shanghai', country: 'Chine', tz: 'Asia/Shanghai' },
+      sydney: { name: 'Sydney', country: 'Australie', tz: 'Australia/Sydney' },
+      auckland: { name: 'Auckland', country: 'Nouvelle-Zélande', tz: 'Pacific/Auckland' }
+    };
+
+    const zoneKey = new URLSearchParams(location.search).get('zone') || 'utc';
+    const region = regions[zoneKey] || regions.utc;
+    const canvas = document.querySelector('#clock');
+    const ctx = canvas.getContext('2d');
+
+    document.querySelector('#name').textContent = region.name;
+    document.querySelector('#country').textContent = region.country;
+    document.title = `ViA — ${region.name}`;
+
+    function getParts(date) {
+      const values = {};
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: region.tz,
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        fractionalSecondDigits: 3
+      }).formatToParts(date).forEach((part) => {
+        values[part.type] = part.value;
+      });
+      return {
+        year: +values.year,
+        month: +values.month,
+        day: +values.day,
+        hour: +values.hour,
+        minute: +values.minute,
+        second: +values.second,
+        ms: +(values.fractionalSecond || 0)
+      };
+    }
+
+    function arc(x, y, r, start, end, width, color, alpha = 1) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, start, end);
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    function label(value, x, y, color, size) {
+      ctx.fillStyle = color;
+      ctx.font = `600 ${size}px system-ui`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(value), x, y);
+    }
+
+    function draw(time) {
+      const bounds = canvas.getBoundingClientRect();
+      const ratio = devicePixelRatio || 1;
+      const width = bounds.width;
+      const height = bounds.height;
+
+      canvas.width = width * ratio;
+      canvas.height = height * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+      ctx.globalCompositeOperation = 'lighter';
+
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) * 0.35;
+      const colors = {
+        ms: '#ff79c6',
+        seconds: '#ff5267',
+        minutes: '#ffd34e',
+        hours: '#55e7cf',
+        days: '#70baff',
+        months: '#a98cff',
+        year: '#ffffff'
+      };
+
+      const secProgress = (time.second + time.ms / 1000) / 60;
+      const minuteProgress = (time.minute + secProgress) / 60;
+      const hourProgress = (time.hour % 24 + minuteProgress) / 24;
+      const phase = -Math.PI / 2 + secProgress * Math.PI * 2;
+      const plasmaRadius = radius * (0.18 + 0.75 * hourProgress);
+
+      arc(centerX, centerY, plasmaRadius, -Math.PI / 2, phase, 6, colors.ms, 0.95);
+      arc(centerX, centerY, plasmaRadius + 8, -Math.PI / 2, phase, 2, colors.seconds, 0.7);
+
+      for (let n = 1; n <= 60; n += 1) {
+        const angle = -Math.PI / 2 + n * Math.PI * 2 / 60;
+        const activeSec = n === time.second + 1;
+        const ringRadius = radius * (0.2 + n * 0.006);
+        arc(centerX, centerY, ringRadius, activeSec ? -Math.PI / 2 : angle - 0.025, angle, activeSec ? 3 : 1.1, colors.seconds, activeSec ? 0.95 : 0.22);
+        if (n % 5 === 0) label(n, centerX + Math.cos(angle) * ringRadius, centerY + Math.sin(angle) * ringRadius, colors.seconds, 8);
+      }
+
+      for (let n = 1; n <= 60; n += 1) {
+        const angle = -Math.PI / 2 + n * Math.PI * 2 / 60;
+        const activeMin = n === time.minute + 1;
+        const ringRadius = radius * (0.62 + n * 0.0035);
+        arc(centerX, centerY, ringRadius, activeMin ? -Math.PI / 2 : angle - 0.035, angle, activeMin ? 4 : 2.2, colors.minutes, activeMin ? 0.95 : 0.3);
+        if (n % 5 === 0) label(n, centerX + Math.cos(angle) * ringRadius, centerY + Math.sin(angle) * ringRadius, colors.minutes, 8);
+      }
+
+      for (let n = 1; n <= 24; n += 1) {
+        const angle = -Math.PI / 2 + n * Math.PI * 2 / 24;
+        const ringRadius = radius * 1.03;
+        const alpha = 0.25 + (n <= time.hour ? 0.35 : 0);
+        arc(centerX, centerY, ringRadius, angle - 0.05, angle + 0.05, 3, colors.hours, alpha);
+        label(n, centerX + Math.cos(angle) * ringRadius, centerY + Math.sin(angle) * ringRadius, colors.hours, 9);
+      }
+
+      arc(centerX, centerY, radius * 1.13, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (time.day / 31), 3, colors.days, 0.8);
+      arc(centerX, centerY, radius * 1.22, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (time.month / 12), 4, colors.months, 0.75);
+      arc(centerX, centerY, radius * 1.31, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ((time.year % 100) / 100), 5, colors.year, 0.7);
+
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i += 1) {
+        const t = i / 100;
+        const angle = phase - t * 2.8;
+        const dist = plasmaRadius * t * (0.35 + 0.65 * t);
+        const x = centerX + Math.cos(angle) * dist;
+        const y = centerY + Math.sin(angle) * dist;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.lineWidth = 7;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = colors.seconds;
+      ctx.shadowBlur = 24;
+      ctx.shadowColor = colors.seconds;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = colors.ms;
+      ctx.beginPath();
+      ctx.arc(centerX + Math.cos(phase) * plasmaRadius, centerY + Math.sin(phase) * plasmaRadius, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function update() {
+      const now = new Date();
+      const time = getParts(now);
+      document.querySelector('#time').textContent = `${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}:${String(time.second).padStart(2, '0')}.${String(time.ms).padStart(3, '0')}`;
+      document.querySelector('#date').textContent = new Intl.DateTimeFormat(document.documentElement.lang || 'fr', { timeZone: region.tz, dateStyle: 'full' }).format(now);
+      draw(time);
+    }
+
+    document.querySelector('#back').addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    document.querySelector('#coff').addEventListener('click', () => {
+      window.location.href = 'coff.html';
+    });
+
+    update();
+    setInterval(update, 50);
+    window.addEventListener('resize', update);
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </co>
+
+  <co name="connections" type="section" role="links">
+    <co name="style" connects="css" />
+    <co name="runtime" connects="javascript" />
+    <co name="document" connects="meta" />
+  </co>
+</body>
+</html>
